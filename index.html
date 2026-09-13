@@ -225,8 +225,9 @@ footer{background:var(--navy);padding:56px 48px 36px;display:grid;grid-template-
 .fcol a:hover{color:var(--cream)}
 .fbot{grid-column:1/-1;border-top:1px solid rgba(245,240,232,.07);padding-top:28px;margin-top:12px;display:flex;justify-content:space-between;font-size:.72rem;color:rgba(245,240,232,.25)}
 .fsoc{display:flex;gap:14px}
-.fsoc a{color:rgba(245,240,232,.35);text-decoration:none;font-size:.72rem;transition:color .2s}
-.fsoc a:hover{color:var(--cream)}
+.fsoc a{display:inline-flex;align-items:center;gap:7px;color:var(--lime);text-decoration:none;font-size:.82rem;font-weight:700;letter-spacing:.02em;padding:8px 16px;border:1.5px solid rgba(200,232,74,.4);border-radius:30px;transition:all .2s}
+.fsoc a:hover{background:var(--lime);color:var(--navy);border-color:var(--lime);transform:translateY(-1px)}
+.fsoc a svg{flex-shrink:0}
 
 /* POPUP */
 #popup-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(26,32,53,.78);backdrop-filter:blur(6px);opacity:0;animation:popOverlay .4s .9s ease forwards}
@@ -500,7 +501,7 @@ table.ltbl{width:100%;border-collapse:collapse}
   </div>
   <div class="fcol"><h5>Explorar</h5><a href="#discover">Descobrir</a></div>
   <div class="fcol"><h5>Empresa</h5><a href="#sobre">Quem somos</a></div>
-  <div class="fbot"><span>© 2025 find' — São Paulo, SP</span><div class="fsoc"><a href="https://www.instagram.com/_findsp?utm_source=ig_web_button_share_sheet&igsi=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener">Instagram</a></div></div>
+  <div class="fbot"><span>© 2025 find' — São Paulo, SP</span><div class="fsoc"><a href="https://www.instagram.com/_findsp/" target="_blank" rel="noopener"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>@_findsp</a></div></div>
 </footer>
 
 <!-- PLACE PROFILE MODAL -->
@@ -701,7 +702,27 @@ function getReviews(pid){ try{return JSON.parse(localStorage.getItem(REVIEWS_KEY
 function saveReview(pid,r){ const rs=getReviews(pid); rs.unshift(r); localStorage.setItem(REVIEWS_KEY+'_'+pid,JSON.stringify(rs)) }
 function getLeads(){ try{return JSON.parse(localStorage.getItem(LEADS_KEY)||'[]')}catch{return[]} }
 function saveLeads(l){ localStorage.setItem(LEADS_KEY,JSON.stringify(l)) }
-function addLead(lead){ const ls=getLeads(); lead.id=Date.now(); lead.date=new Date().toLocaleString('pt-BR'); ls.unshift(lead); saveLeads(ls); updateFabCount() }
+// ── GOOGLE SHEETS (Apps Script) ──
+// 1) Crie uma planilha nova no Google Sheets.
+// 2) Menu Extensões → Apps Script, apague o conteúdo padrão e cole o código do arquivo
+//    "google-apps-script.gs" (fornecido junto com este site).
+// 3) No editor do Apps Script: Implantar → Nova implantação → tipo "App da Web".
+//    Executar como: "Eu". Quem pode acessar: "Qualquer pessoa".
+// 4) Copie a URL do app da web gerada e cole abaixo.
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwXUXxXpLOE43-o15Uc11DAgOWzuNffjxsxvJgM_eQy6jIjearEWx5CMDIepyIAzgix_A/exec';
+
+function sendLeadToSheet(lead){
+  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf('COLE_AQUI') === 0){
+    console.warn('[find\'] URL do Apps Script não configurada — lead salvo só localmente.');
+    return;
+  }
+  fetch(APPS_SCRIPT_URL, {
+    method:'POST',
+    body: JSON.stringify(lead) // sem header Content-Type: evita pre-flight CORS com o Apps Script
+  }).catch(err=>console.warn('[find\'] Falha ao enviar lead para a planilha:', err));
+}
+
+function addLead(lead){ const ls=getLeads(); lead.id=Date.now(); lead.date=new Date().toLocaleString('pt-BR'); ls.unshift(lead); saveLeads(ls); updateFabCount(); sendLeadToSheet(lead); }
 function updateFabCount(){ const el=document.getElementById('fabCount'); if(el) el.textContent=getLeads().length }
 
 // ── HERO DOTS ──
