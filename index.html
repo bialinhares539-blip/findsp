@@ -884,6 +884,10 @@ async function submitSurvey(){
     alert('Insira seu e-mail 😊');
     return;
   }
+  if(!document.getElementById('sEmail').checkValidity()){
+    alert('Digite um e-mail válido, como nome@exemplo.com');
+    return;
+  }
 
   const interests=[...document.querySelectorAll('#sq1 .sopt.on')]
     .map(x=>x.textContent.trim());
@@ -909,7 +913,8 @@ async function submitSurvey(){
     });
 
     if(!response.ok){
-      throw new Error('Erro ao salvar cadastro');
+      const details=await response.json().catch(()=>({}));
+      throw new Error(details.error || `Erro ${response.status}`);
     }
 
     btn.textContent='Você está na lista! 🎉';
@@ -918,7 +923,12 @@ async function submitSurvey(){
     console.error(error);
     btn.disabled=false;
     btn.textContent='Quero acesso antecipado ✨';
-    alert('Não foi possível salvar seu cadastro. Tente novamente.');
+    const message=error instanceof TypeError
+      ? 'Não foi possível conectar. Verifique sua internet e tente novamente.'
+      : error.message==='Dados inválidos'
+        ? 'Confira se o e-mail e a data de nascimento estão corretos.'
+        : 'Não foi possível salvar seu cadastro agora. Tente novamente.';
+    alert(message);
   }
 }
 
@@ -934,9 +944,10 @@ function closePopup(){const ov=document.getElementById('popup-overlay');ov.style
 async function submitPopup(){
   const emailInput=document.getElementById('popEmail');
   const email=emailInput.value.trim();
-  if(!email){
+  if(!email || !emailInput.checkValidity()){
     emailInput.style.borderColor='#f87171';
     emailInput.focus();
+    alert('Digite um e-mail válido, como nome@exemplo.com');
     return;
   }
 
@@ -963,7 +974,8 @@ async function submitPopup(){
     });
 
     if(!response.ok){
-      throw new Error('Erro ao salvar cadastro');
+      const details=await response.json().catch(()=>({}));
+      throw new Error(details.error || `Erro ${response.status}`);
     }
 
     document.getElementById('popupBody').innerHTML=`<div class="pok"><div class="pok-icon">🎉</div><h3>Você está na lista!</h3><p>Obrigado${name?' '+name:''}!<br>Você será um dos primeiros a testar o find' em São Paulo.</p><button class="pbtn" style="margin-top:24px" onclick="closePopup()">Explorar o site ✨</button></div>`;
@@ -971,7 +983,12 @@ async function submitPopup(){
     console.error(error);
     button.disabled=false;
     button.textContent='Quero acesso antecipado ✨';
-    alert('Não foi possível salvar seu cadastro. Tente novamente.');
+    const message=error instanceof TypeError
+      ? 'Não foi possível conectar. Verifique sua internet e tente novamente.'
+      : error.message==='Dados inválidos'
+        ? 'Confira se o e-mail e a data de nascimento estão corretos.'
+        : 'Não foi possível salvar seu cadastro agora. Tente novamente.';
+    alert(message);
   }
 }
 
