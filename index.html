@@ -2,6 +2,13 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-WZZVJZW');</script>
+<!-- End Google Tag Manager -->
 <script async src="https://t.contentsquare.net/uxa/5c6c6934c138d.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>find' — Descubra São Paulo</title>
@@ -398,6 +405,10 @@ table.ltbl{width:100%;border-collapse:collapse}
 </style>
 </head>
 <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WZZVJZW"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 
 <!-- NAV -->
 <nav id="navbar">
@@ -834,7 +845,7 @@ function saveReview(pid,r){ const rs=getReviews(pid); rs.unshift(r); localStorag
 function getLeads(){ try{return JSON.parse(localStorage.getItem(LEADS_KEY)||'[]')}catch{return[]} }
 function saveLeads(l){ localStorage.setItem(LEADS_KEY,JSON.stringify(l)) }
 function addLead(lead){ const ls=getLeads(); lead.id=Date.now(); lead.date=new Date().toLocaleString('pt-BR'); ls.unshift(lead); saveLeads(ls); updateFabCount() }
-function updateFabCount(){ document.getElementById('fabCount').textContent=getLeads().length }
+function updateFabCount(){ const el=document.getElementById('fabCount'); if(el) el.textContent=getLeads().length }
 
 // ── HERO DOTS ──
 const hbd=document.getElementById('heroBgDots');
@@ -1114,6 +1125,19 @@ function exportCSV(){
 function clearLeads(){if(!confirm('Apagar todos os leads?'))return;saveLeads([]);updateFabCount();renderAdmin()}
 
 
+// ── RASTREAMENTO (GTM / dataLayer) ──
+window.dataLayer = window.dataLayer || [];
+let _lastClickPush = 0;
+function trackCadastroClique(){
+  const now = Date.now();
+  if(now - _lastClickPush < 1000) return; // evita disparo duplicado na mesma interação (duplo clique)
+  _lastClickPush = now;
+  window.dataLayer.push({ event: 'find_cadastro_clique' });
+}
+function trackCadastroSucesso(){
+  window.dataLayer.push({ event: 'find_cadastro_sucesso' });
+}
+
 // ── MODAL ASSINATURA ──
 function abrirAssinar(plano){
   document.getElementById('assinarPlanoNome').textContent = plano;
@@ -1149,6 +1173,7 @@ function fecharAssinar(e){
   }
 }
 async function submitAssinar(){
+  trackCadastroClique();
   const nome = document.getElementById('assinarNome').value.trim();
   const email = document.getElementById('assinarEmail').value.trim();
   const plano = document.getElementById('assinarPlano').value;
@@ -1158,6 +1183,7 @@ async function submitAssinar(){
   btn.disabled=true;btn.textContent='Enviando...';
   try{ await sendLead({ name: nome, email, plan: plano, origin: 'assinatura' }); }
   catch(error){ btn.disabled=false;btn.textContent='Confirmar interesse ✨';alert(leadErrMsg(error));return; }
+  trackCadastroSucesso();
   // success
   document.getElementById('assinarBody').innerHTML = `
     <div class="assinar-ok">
