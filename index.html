@@ -7,7 +7,7 @@
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-WZZVJZW');</script>
+})(window,document,'script','dataLayer','GTM-WZZZVJZW');</script>
 <!-- End Google Tag Manager -->
 <script async src="https://t.contentsquare.net/uxa/5c6c6934c138d.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -406,7 +406,7 @@ table.ltbl{width:100%;border-collapse:collapse}
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WZZVJZW"
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WZZZVJZW"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 
@@ -1066,6 +1066,7 @@ buildSQ('sq1',['Cultura','Gastronomia','Natureza','Balada','Bem-estar','Arte']);
 buildSQ('sq2',['Solo','Casal','Amigos','Família','Colegas']);
 document.getElementById('sDob').setAttribute('max',new Date().toISOString().slice(0,10));
 async function submitSurvey(){
+  trackCadastroClique();
   const email=document.getElementById('sEmail').value.trim();
   if(!email){alert('Insira seu e-mail 😊');return}
   const btn=document.querySelector('.ssubmit');
@@ -1076,6 +1077,7 @@ async function submitSurvey(){
       interests:[...document.querySelectorAll('#sq1 .sopt.on')].map(x=>x.textContent.trim()),
       companions:document.querySelector('#sq2 .sopt.on')?.textContent.trim()||null,
       marketing_consent:false,origin:'site'});
+    trackCadastroSucesso();
     btn.textContent='Você está na lista! 🎉';btn.style.background='#C8E84A';
   }catch(error){
     btn.disabled=false;btn.textContent='Quero acesso antecipado ✨';alert(leadErrMsg(error));
@@ -1091,15 +1093,20 @@ document.getElementById('popDob').setAttribute('max',new Date().toISOString().sl
 const dismissed=localStorage.getItem('find_popup_dismissed');
 if(dismissed===new Date().toDateString()) document.getElementById('popup-overlay').style.display='none';
 function closePopup(){const ov=document.getElementById('popup-overlay');ov.style.opacity='0';ov.style.transition='opacity .3s';setTimeout(()=>ov.style.display='none',300);localStorage.setItem('find_popup_dismissed',new Date().toDateString())}
+let _popupSucessoSent = false; // evita sucesso duplicado em duplo clique no popup
 async function submitPopup(){
+  trackCadastroClique();
   const email=document.getElementById('popEmail').value.trim();
   if(!email){document.getElementById('popEmail').style.borderColor='#f87171';document.getElementById('popEmail').focus();return}
   const name=document.getElementById('popName').value.trim();
+  const btn=document.querySelector('#popupBody .pbtn');
+  btn.disabled=true;btn.textContent='Enviando...';
   try{
     await sendLead({name,email,birth_date:document.getElementById('popDob').value||null,
       interests:[...document.querySelectorAll('#pchips .pchip.on')].map(x=>x.textContent.trim()),
       marketing_consent:document.getElementById('popNotif')?.checked||false,origin:'popup'});
-  }catch(error){alert(leadErrMsg(error));return}
+  }catch(error){btn.disabled=false;btn.textContent='Quero acesso antecipado ✨';alert(leadErrMsg(error));return}
+  if(!_popupSucessoSent){ _popupSucessoSent = true; trackCadastroSucesso(); }
   document.getElementById('popupBody').innerHTML=`<div class="pok"><div class="pok-icon">🎉</div><h3>Você está na lista!</h3><p>Obrigado${name?' '+name:''}!<br>Você será um dos primeiros a testar o find' em São Paulo.</p><button class="pbtn" style="margin-top:24px" onclick="closePopup()">Explorar o site ✨</button></div>`;
 }
 
